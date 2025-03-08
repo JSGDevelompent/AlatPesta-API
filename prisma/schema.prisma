@@ -1,0 +1,203 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id         Int       @id @default(autoincrement())
+  username   String    @unique @db.VarChar(255)
+  password   String    @db.VarChar(255)
+  token      String?   @db.VarChar(255)
+  limitToken DateTime?
+}
+
+model Company {
+  id                 Int      @id @default(autoincrement())
+  name               String   @db.VarChar(255)
+  icon               String?  @db.Text
+  aboutUs            String?  @db.Text
+  termsAndConditions String?  @db.Text
+  linkGMap           String?  @db.Text
+  phoneNumber        String?  @db.VarChar(20)
+  email              String?  @db.VarChar(100)
+  facebook           String?  @db.VarChar(255)
+  twitter            String?  @db.VarChar(255)
+  instagram          String?  @db.VarChar(255)
+  linkedIn           String?  @db.VarChar(255)
+  youtube            String?  @db.VarChar(255)
+  shopee             String?  @db.VarChar(255)
+  lazada             String?  @db.VarChar(255)
+  tokoPedia          String?  @db.VarChar(255)
+  createAt           DateTime @default(now())
+  updateAt           DateTime @updatedAt
+}
+
+model QuestionsAndAnswers {
+  id       Int      @id @default(autoincrement())
+  title    String   @db.VarChar(255)
+  question String   @db.Text
+  answer   String   @db.Text
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+}
+
+model ShippingPrice {
+  id               Int                @id @default(autoincrement())
+  type             shippingPriceType  @default(FixedPrice)
+  price            Int                @default(0) @db.Int
+  distance         Float?             @default(0) @db.Float
+}
+
+model Promo {
+  id              Int              @id @default(autoincrement())
+  title           String           @db.VarChar(100)
+  description     String           @db.Text
+  type            promoType
+  image           String           @db.Text
+  promoEndDate    DateTime?        @db.DateTime(0)
+  createAt        DateTime         @default(now())
+  updateAt        DateTime         @updatedAt
+  Discount        Discount?
+  DayRentDiscount DayRentDiscount?
+  FreeShipping    FreeShipping?
+}
+
+model Discount {
+  id                    Int           @id @default(autoincrement())
+  discountModel         discountModel @default(RateDiscount)
+  maximumDiscount       Int?          @db.Int
+  minPrice              Int           @default(0) @db.Int
+  discount              Int           @default(0) @db.Int
+  promoId               Int           @unique @db.Int
+  promo                 Promo         @relation(fields: [promoId], references: [id], onDelete: Cascade)
+}
+
+model DayRentDiscount {
+  id                    Int           @id @default(autoincrement())
+  minDay                Int           @default(0) @db.Int
+  minPrice              Int           @default(0) @db.Int
+  discountModel         discountModel @default(RateDiscount)
+  discount              Int           @default(0) @db.Int
+  maximumDiscount       Int           @default(0) @db.Int
+  promoId               Int           @unique @db.Int
+  promo                 Promo         @relation(fields: [promoId], references: [id], onDelete: Cascade)
+}
+
+model FreeShipping {
+  id                    Int           @id @default(autoincrement())
+  maximumDiscount       Int?          @db.Int
+  discountModel         discountModel @default(RateDiscount)
+  discount              Int           @default(0) @db.Int
+  minDay                Int           @default(0) @db.Int
+  minPrice              Int           @default(0) @db.Int
+  maxDistance           Float         @default(0) @db.Float
+  promoId               Int           @unique @db.Int
+  promo                 Promo         @relation(fields: [promoId], references: [id], onDelete: Cascade)
+}
+
+model News {
+  id       Int      @id @default(autoincrement())
+  title    String   @db.VarChar(100)
+  news     String?  @db.Text
+  image    String?  @db.Text
+  show     Boolean  @default(true)
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+}
+
+model TypeTools {
+  id       Int      @id @default(autoincrement())
+  name     String   @unique @db.VarChar(255)
+  Tools    Tools[]
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+}
+
+model ModelTools {
+  id       Int      @id @default(autoincrement())
+  name     String   @unique @db.VarChar(255)
+  Tools    Tools[]
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+}
+
+model Tools {
+  id          Int         @id @default(autoincrement())
+  name        String      @db.VarChar(255)
+  image       String      @db.Text
+  description String?     @db.Text
+  price       Int         @db.Int
+  modelId     Int         @db.Int
+  typeId      Int         @db.Int
+  colorsId    Int?        @db.Int
+  subTools    SubTools[]
+  typeTools   TypeTools   @relation(fields: [typeId], references: [id])
+  modelTools  ModelTools  @relation(fields: [modelId], references: [id])
+  colorsTools ColorTools? @relation(fields: [colorsId], references: [id])
+  createAt    DateTime    @default(now())
+  updateAt    DateTime    @updatedAt
+}
+
+model SubTools {
+  id          Int             @id @default(autoincrement())
+  name        String          @db.VarChar(255)
+  images      SubToolsImage[]
+  price       Int             @db.Int
+  toolsId     Int             @db.Int
+  tools       Tools           @relation(fields: [toolsId], references: [id], onDelete: Cascade)
+  createAt    DateTime        @default(now())
+  updateAt    DateTime        @updatedAt
+}
+
+model SubToolsImage {
+  id          Int      @id @default(autoincrement())
+  image       String   @db.Text
+  name        String   @db.VarChar(255)
+  subToolsId  Int      @db.Int
+  colors      Json     @db.Json
+  subTools    SubTools @relation(fields: [subToolsId], references: [id], onDelete: Cascade)
+  createAt    DateTime @default(now())
+}
+
+model ColorTools {
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(255) @unique
+  colors      Json       @db.Json
+  Tools       Tools[]
+  options     Int        @db.Int
+  createAt    DateTime   @default(now())
+  updateAt    DateTime   @updatedAt
+}
+
+model Visitors {
+  id         Int      @id @default(autoincrement())
+  page       String   @db.VarChar(255)
+  visitCount Int      @default(0)
+  date       DateTime @default(now())
+}
+
+enum discountModel {
+  FixedPrice
+  RateDiscount
+}
+
+enum promoType {
+  Discount
+  FreeShipping
+  DayRentDiscount
+}
+
+enum shippingPriceType {
+  PriceDistance
+  FixedPrice
+}
