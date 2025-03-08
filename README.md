@@ -1,4 +1,4 @@
-# PersewaanAPI
+# Alat Pesta API
 API for a rental system with authentication, product management, and Cloudinary integration for image storage.
 
 <p align="center">
